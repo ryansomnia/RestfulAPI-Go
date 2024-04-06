@@ -17,7 +17,9 @@ type Config struct {
 	LocalDatabase string
 }
 
-func InitDB() (*sql.DB, error) {
+var db *sql.DB
+
+func ConnectToDB() error {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Failed to load .env file %v", err)
 	}
@@ -35,15 +37,21 @@ func InitDB() (*sql.DB, error) {
 		config.LocalHost,
 		config.LocalDatabase)
 
-	db, err := sql.Open("mysql", connectionString)
+	d, err := sql.Open("mysql", connectionString)
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	db = d
 
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return db, nil
+	return nil
+}
+
+func GetDB() *sql.DB {
+	return db
 }

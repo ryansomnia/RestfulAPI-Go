@@ -2,33 +2,28 @@ package main
 
 import (
 	"RestfulAPI/config"
-	"RestfulAPI/routes"
-	"fmt"
+	"RestfulAPI/handler"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	// Inisialisasi koneksi database
-	db, err := config.InitDB()
+	// Connect to the database
+	err := config.ConnectToDB()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Fatal("Failed to connect to database:", err)
+		return
 	}
-	defer db.Close()
 
-	fmt.Println("Connected to MySQL database successfully!")
+	r := mux.NewRouter()
 
-	// Definisikan port yang ingin digunakan
-	// port := os.Getenv("PORT")
-	// if port == "" {
-	// port = "8080" // Gunakan port 8080 jika PORT tidak didefinisikan
-	// }
+	// Routes
 
-	http.HandleFunc("/get/user", routes.UserHandler)
+	r.HandleFunc("/get/user", handler.GetAllUsers).Methods("GET")
+	r.HandleFunc("/post/user", handler.CreateUser).Methods("POST")
 
-	fmt.Printf("Server is running on port %s...\n", 8080)
-	// Jalankan server HTTP
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server started on port 8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
-
-// logMiddleware adalah fungsi penengah yang menambahkan log sebelum menangani permintaan
